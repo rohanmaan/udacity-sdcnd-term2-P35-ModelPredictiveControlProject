@@ -53,7 +53,7 @@ class FG_eval {
     fg[0] = 0;
 
     // The part of the cost based on the reference state.
-    for (int i = 0; i < N; i++) {
+    for (size_t i = 0; i < N; i++) {
       // trajectory
       fg[0] += CppAD::pow(vars[cte_start + i] - ref_cte, 2);
       fg[0] += CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
@@ -61,13 +61,13 @@ class FG_eval {
     }
 
     // Minimize the use of actuators.
-    for (int i = 0; i < N - 1; i++) {
+    for (size_t i = 0; i < N - 1; i++) {
       fg[0] += CppAD::pow(vars[delta_start + i], 2);
       fg[0] += 10*CppAD::pow(vars[a_start + i], 2);
     }
 
     // Minimize the value gap between sequential actuations.
-    for (int i = 0; i < N - 2; i++) {
+    for (size_t i = 0; i < N - 2; i++) {
       fg[0] += 600*CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
       fg[0] += CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     }
@@ -161,7 +161,7 @@ Solution MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   // Initial value of the independent variables.
   // Should be 0 except for the initial values.
   Dvector vars(n_vars);
-  for (int i = 0; i < n_vars; i++) {
+  for (size_t i = 0; i < n_vars; i++) {
     vars[i] = 0.0;
   }
   // Set the initial variable values
@@ -178,31 +178,31 @@ Solution MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
 
   // Set all non-actuators upper and lowerlimits
   // to the max negative and positive values.
-  for (int i = 0; i < delta_start; i++) {
+  for (size_t i = 0; i < delta_start; i++) {
     vars_lowerbound[i] = -1.0e19;
     vars_upperbound[i] = 1.0e19;
   }
 
   // The upper and lower limits of delta are set to -25 and 25 degrees (values in radians).
-  for (int i = delta_start; i < a_start; i++) {
+  for (size_t i = delta_start; i < a_start; i++) {
     vars_lowerbound[i] = -0.436332;
     vars_upperbound[i] = 0.436332;
   }
 
   // constrain delta to be the previous control for the latency time
-  for (int i = delta_start; i < delta_start + latency_ind; i++) {
+  for (size_t i = delta_start; i < delta_start + latency_ind; i++) {
     vars_lowerbound[i] = delta_prev;
     vars_upperbound[i] = delta_prev;
   }
 
   // Acceleration/decceleration upper and lower limits.
-  for (int i = a_start; i < n_vars; i++) {
+  for (size_t i = a_start; i < n_vars; i++) {
     vars_lowerbound[i] = -1.0;
     vars_upperbound[i] =  1.0;
   }
 
   // constrain a to be the previous control for the latency time 
-  for (int i = a_start; i < a_start+latency_ind; i++) {
+  for (size_t i = a_start; i < a_start+latency_ind; i++) {
     vars_lowerbound[i] = a_prev;
     vars_upperbound[i] = a_prev;
   }
@@ -212,7 +212,7 @@ Solution MPC::Solve(Eigen::VectorXd x0, Eigen::VectorXd coeffs) {
   // state indices.
   Dvector constraints_lowerbound(n_constraints);
   Dvector constraints_upperbound(n_constraints);
-  for (int i = 0; i < n_constraints; i++) {
+  for (size_t i = 0; i < n_constraints; i++) {
     constraints_lowerbound[i] = 0;
     constraints_upperbound[i] = 0;
   }
